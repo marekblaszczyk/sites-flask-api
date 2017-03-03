@@ -1,0 +1,13 @@
+config/local.yaml
+config/local-prod.yaml
+*.pyc
+*.swp
+.idea/*
+build/*
+.coverage
+.cache
+htmlcov/*
+results.xml
+pylint.out
+coverage.xml
+db_data/*
