@@ -21,6 +21,7 @@ class BaseConfig(object):
     )
     RESTFUL_JSON = {'ensure_ascii': False, 'indent': 4, 'encoding': 'utf-8'}
     CONFIG = 'base'
+    NAMEKO_AMQP_URI = 'amqp://guest:guest@localhost'
 
 
 class TestingConfig(BaseConfig):
