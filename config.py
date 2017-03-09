@@ -17,7 +17,7 @@ class BaseConfig(object):
     ERROR_404_HELP = False
 
     BLUEPRINTS = (
-        'api'
+        'api',
     )
     RESTFUL_JSON = {'ensure_ascii': False, 'indent': 4, 'encoding': 'utf-8'}
     CONFIG = 'base'
