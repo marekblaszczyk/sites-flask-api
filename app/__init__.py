@@ -6,6 +6,7 @@ import os
 from flask import Flask, jsonify
 from app.exceptions import ApiException
 from app.extensions import RPC
+from flask_restful_swagger_2 import get_swagger_blueprint
 
 
 __all__ = ['app']
@@ -15,13 +16,15 @@ def create_app(config=None, config_file=None):
     """This factory function create app object with parameters send toi function."""
 
     app = Flask(__name__)
+    docs = []
 
     configure_app(app, config, config_file)
     configure_extensions(app)
 
     blueprints = app.config['BLUEPRINTS']
 
-    configure_blueprints(app, blueprints)
+    ret_docs = configure_blueprints(app, blueprints, docs=docs)
+    configure_swagger(app=app, docs=ret_docs)
     configure_exceptions(app)
 
     return app
@@ -33,7 +36,7 @@ def configure_app(app, config=None, config_file=None):
     If you need, you can pass config file by parameter.
     """
     # http://flask.pocoo.org/docs/api/#configuration
-    config_name = os.getenv('PUBLIC_API_CONFIG', 'DevelopmentConfig')
+    config_name = os.getenv('SITES_FLASK_API_CONFIG', 'DevelopmentConfig')
     app.config.from_object('config.' + config_name)
 
     # example file is config.cfg
@@ -53,7 +56,7 @@ def configure_extensions(app):
     RPC.init_app(app)
 
 
-def configure_blueprints(app, blueprints):
+def configure_blueprints(app, blueprints, docs):
     """
     This function configures blueprints which are passed to function.
     """
@@ -69,13 +72,19 @@ def configure_blueprints(app, blueprints):
         else:
             raise Exception('Bad blueprint config.')
 
-        add_blueprint(app, name, rest)
+        doc = add_blueprint(app, name, rest)
+        docs.append(doc)
+    return docs
 
 
 def add_blueprint(app, name, rest):
     """This function register blueprint in application app."""
-    blueprint = import_variable(name, 'urls', 'BLUEPRINT')
-    app.register_blueprint(blueprint, **rest)
+    blueprint_func = import_variable(name, 'urls', 'get_blueprint')
+    blueprint = blueprint_func()
+
+    app.register_blueprint(blueprint.blueprint, **rest)
+    doc = blueprint.get_swagger_doc()
+    return doc
 
 
 def import_variable(blueprint_path, module, variable_name):
@@ -83,6 +92,13 @@ def import_variable(blueprint_path, module, variable_name):
     path = '.'.join(['app'] + blueprint_path.split('.') + [module])
     mod = __import__(path, fromlist=[variable_name])
     return getattr(mod, variable_name)
+
+
+def configure_swagger(app, docs):
+    """This function register endpoint for swagger."""
+    app.register_blueprint(
+        get_swagger_blueprint(docs, '/api/swagger', title='Sites Flask API', api_version='1')
+    )
 
 
 def configure_exceptions(app):

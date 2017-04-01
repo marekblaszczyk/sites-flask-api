@@ -7,8 +7,13 @@ from flask_restful_swagger_2 import Api
 from app.api.resources.sites import SitesResource, SiteResource
 
 
-BLUEPRINT = Blueprint('api', __name__)
-api = Api(BLUEPRINT, api_version='0.1', api_spec_url='/api/swagger')
+def get_blueprint():
+    """Create blueprint"""
 
-api.add_resource(SitesResource, '/sites', endpoint='sites')
-api.add_resource(SiteResource, '/site', endpoint='site')
+    blueprint = Blueprint('api', __name__)
+    api = Api(blueprint, add_api_spec_resource=False)
+
+    api.add_resource(SitesResource, '/sites', endpoint='sites')
+    api.add_resource(SiteResource, '/site', endpoint='site')
+
+    return api
