@@ -21,11 +21,20 @@ class SitesResource(BaseResource):
 class SiteResource(BaseResource):
     """Resource for one site."""
 
+    def get(self, site_id):
+        """Get method ask microservice about page by id."""
+
+        site = RPC.site_service.get_site(site_id=site_id, url=None)
+        return self.serialize(data=site, schema=SITE_SCHEMA)
+
+
+class SiteByUrlResource(BaseResource):
+    """Resource for one site."""
+
     def get(self):
         """Get method ask microservice about page with url."""
 
-        site_id = request.args.get('site_id', None)
         url = request.args.get('url', None)
 
-        site = RPC.site_service.get_site(site_id=site_id, url=url)
+        site = RPC.site_service.get_site(site_id=None, url=url)
         return self.serialize(data=site, schema=SITE_SCHEMA)
